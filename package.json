@@ -1,0 +1,14 @@
+{
+  "name": "reviverequest",
+  "version": "1.0.0",
+  "description": "Netlify site for Revive Requests",
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
