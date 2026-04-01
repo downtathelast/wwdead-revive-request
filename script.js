@@ -116,10 +116,10 @@ form.addEventListener("submit", async (e) => {
   };
 
   // Google Sheets webhook
-  const sheetsUrl = "PASTE_YOUR_GOOGLE_SHEETS_WEBAPP_URL_HERE";
+  const sheetsUrl = "https://script.google.com/macros/s/AKfycbyhNpYYi1YEMllbUmkLPgiG16V_DcbZ4oZIS0YBYPHlfzgiHnP0kRHFjpb2f19Te5n1/exec";
 
   // Discord webhook
-  const discordUrl = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
+  //const discordUrl = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
 
   try {
     await fetch(sheetsUrl, {
