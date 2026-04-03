@@ -4,8 +4,7 @@ exports.handler = async (event) => {
 
     console.log("Sending:", data);
 
-    const response = await fetch("https://script.google.com/macros/s/AKfycbyhNpYYi1YEMllbUmkLPgiG16V_DcbZ4oZIS0YBYPHlfzgiHnP0kRHFjpb2f19Te5n1/exec", {
-      method: "POST",
+   fetch("https://script.google.com/macros/s/AKfycbx_HIshLFMJ1TfP3hsJYmqrWohOh4KTcfSRnGJWq75898PuHgam3UqV7yQTaGPhup8/exec", {
       headers: {
         "Content-Type": "application/json"
       },
