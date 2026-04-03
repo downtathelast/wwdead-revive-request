@@ -102,10 +102,12 @@ suburbSelect.addEventListener("change", () => {
 });
 
 // ----------------------
-// Submit form → Google Sheets + Discord
+// Submit form → Netlify function
 // ----------------------
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  status.textContent = "⏳ Sending...";
+
   const data = {
     playerName: form.playerName.value,
     profileLink: form.profileLink.value,
@@ -115,29 +117,20 @@ form.addEventListener("submit", async (e) => {
     notes: form.notes.value
   };
 
-  // Google Sheets webhook
-  const sheetsUrl = "https://script.google.com/macros/s/AKfycbyhNpYYi1YEMllbUmkLPgiG16V_DcbZ4oZIS0YBYPHlfzgiHnP0kRHFjpb2f19Te5n1/exec";
-
-  // Discord webhook
-  //const discordUrl = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
-
   try {
-    await fetch(sheetsUrl, {
+    const response = await fetch("/.netlify/functions/revive", {
       method: "POST",
-      body: JSON.stringify(data),
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
     });
 
-    await fetch(discordUrl, {
-      method: "POST",
-      body: JSON.stringify({
-        content: `Revive Request: **${data.playerName}** in **${data.suburb}** at **${data.location}**\nProfile: ${data.profileLink}\nNotes: ${data.notes}`
-      }),
-      headers: { "Content-Type": "application/json" }
-    });
+    const result = await response.text();
 
-    status.textContent = "✅ Revive request sent!";
-    form.reset();
+    status.textContent = response.ok
+      ? "✅ Revive request sent!"
+      : `❌ Failed: ${result}`;
+
+    if (response.ok) form.reset();
     suburbSelect.innerHTML = `<option value="">-- Select Suburb --</option>`;
     reviveSelect.innerHTML = `<option value="">-- Select Revive Point --</option>`;
   } catch (err) {
