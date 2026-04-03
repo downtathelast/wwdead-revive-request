@@ -7,7 +7,7 @@ exports.handler = async (event) => {
     console.log("Received:", data);
 
     // Google Sheets Web App URL
-    const sheetsUrl = "https://script.google.com/macros/s/AKfycbyhNpYYi1YEMllbUmkLPgiG16V_DcbZ4oZIS0YBYPHlfzgiHnP0kRHFjpb2f19Te5n1/exec";
+    const sheetsUrl = "https://script.google.com/macros/s/AKfycbzE4Pc8Gkr5xIw4OkD3bOxTv_I99BdazyCWoNuIYfWoNGxjyMyIYr7JwG4r0lfCU5KN/exec";
 
     // Optional: Discord webhook URL
     // const discordUrl = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
