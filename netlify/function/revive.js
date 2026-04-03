@@ -1,36 +1,50 @@
+// netlify/functions/revive.js
 exports.handler = async (event) => {
   try {
+    // Parse incoming JSON from frontend
     const data = JSON.parse(event.body);
 
-    console.log("Sending:", data);
+    console.log("Received:", data);
 
-    // Await the fetch and store the response
-    const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbx_HIshLFMJ1TfP3hsJYmqrWohOh4KTcfSRnGJWq75898PuHgam3UqV7yQTaGPhup8/exec",
-      {
+    // Google Sheets Web App URL
+    const sheetsUrl = "https://script.google.com/macros/s/AKfycbyhNpYYi1YEMllbUmkLPgiG16V_DcbZ4oZIS0YBYPHlfzgiHnP0kRHFjpb2f19Te5n1/exec";
+
+    // Optional: Discord webhook URL
+    // const discordUrl = "PASTE_YOUR_DISCORD_WEBHOOK_URL_HERE";
+
+    // Send data to Google Sheets
+    const sheetsResponse = await fetch(sheetsUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const sheetsText = await sheetsResponse.text();
+    console.log("Google Sheets response:", sheetsText);
+
+    // Optional: send to Discord
+    /*
+    if (discordUrl) {
+      await fetch(discordUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data),
-        redirect: "follow"
-      }
-    );
-
-    const text = await response.text();
-
-    console.log("Google said:", text);
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: `Revive Request: **${data.playerName}** in **${data.suburb}** at **${data.location}**\nProfile: ${data.profileLink}\nNotes: ${data.notes}`
+        })
+      });
+    }
+    */
 
     return {
       statusCode: 200,
-      body: text
+      body: sheetsText
     };
 
   } catch (err) {
     console.error("ERROR:", err);
     return {
       statusCode: 500,
-      body: "Error"
+      body: "Error sending revive request"
     };
   }
 };
