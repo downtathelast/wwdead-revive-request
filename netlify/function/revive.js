@@ -4,13 +4,18 @@ exports.handler = async (event) => {
 
     console.log("Sending:", data);
 
-   fetch("https://script.google.com/macros/s/AKfycbx_HIshLFMJ1TfP3hsJYmqrWohOh4KTcfSRnGJWq75898PuHgam3UqV7yQTaGPhup8/exec", {
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data),
-      redirect: "follow" // 👈 THIS IS THE FIX
-    });
+    // Await the fetch and store the response
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbx_HIshLFMJ1TfP3hsJYmqrWohOh4KTcfSRnGJWq75898PuHgam3UqV7yQTaGPhup8/exec",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(data),
+        redirect: "follow"
+      }
+    );
 
     const text = await response.text();
 
