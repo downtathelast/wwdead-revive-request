@@ -145,11 +145,16 @@ document.getElementById("suburb").addEventListener("change", function () {
 });
 
 // Handle form submission
-document.getElementById("reviveForm").addEventListener("submit", async function (e) {
+document.getElementById("reviveForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   const status = document.getElementById("status");
   status.textContent = "Sending...";
+
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "https://script.google.com/macros/s/AKfycbyih8RHw5VreUay97BCc6B7F1IE3wKWVqXFHfysyOOBb6KP427oUIJoR1xCZ0IPoOs/exec";
+  form.target = "hidden_iframe";
 
   const playerName = this.querySelector('[name="playerName"]').value;
   const profileLink = this.querySelector('[name="profileLink"]').value;
@@ -158,33 +163,32 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
   const revivePoint = this.querySelector('[name="revivePoint"]').value;
   const notes = this.querySelector('[name="notes"]').value;
 
-  // 🔥 CORS-SAFE PAYLOAD
-  const params = new URLSearchParams();
-  params.append("playerName", playerName);
-  params.append("profileLink", profileLink);
-  params.append("sector", sector);
-  params.append("suburb", suburb);
-  params.append("location", revivePoint);
-  params.append("notes", notes);
+  function addField(name, value) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    form.appendChild(input);
+  }
 
-  try {
-    const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbxf9j4r0keNHzZeAosiv4xxYDnzfqhuMQdEL4LH2E5Q_tVAne79DcPMcC5TR4Tj6c-1/exec",
-      {
-        method: "POST",
-        body: params
-      }
-    );
+  addField("playerName", playerName);
+  addField("profileLink", profileLink);
+  addField("sector", sector);
+  addField("suburb", suburb);
+  addField("location", revivePoint);
+  addField("notes", notes);
 
-    const text = await response.text();
-    console.log("Apps Script response:", text);
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
 
-    if (response.ok) {
-      status.textContent = "✅ Revive request sent!";
-      this.reset();
+  status.textContent = "✅ Revive request sent!";
+  this.reset();
 
-      document.getElementById("suburb").innerHTML = '<option value="">--</option>';
-      document.getElementById("revivePoint").innerHTML = '<option value="">--</option>';
+  document.getElementById("suburb").innerHTML = '<option value="">--</option>';
+  document.getElementById("revivePoint").innerHTML = '<option value="">--</option>';
+});
+ALSO add this once in your HTML (important)
     } else {
       status.textContent = "❌ Server error: " + text;
     }
