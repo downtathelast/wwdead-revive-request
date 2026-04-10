@@ -169,7 +169,7 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
 
   try {
     const response = await fetch(
-      "https://script.google.com/macros/s/AKfycbyih8RHw5VreUay97BCc6B7F1IE3wKWVqXFHfysyOOBb6KP427oUIJoR1xCZ0IPoOs/exec",
+      "https://script.google.com/macros/s/AKfycbxf9j4r0keNHzZeAosiv4xxYDnzfqhuMQdEL4LH2E5Q_tVAne79DcPMcC5TR4Tj6c-1/exec",
       {
         method: "POST",
         body: params
