@@ -171,7 +171,7 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
   formData.append("notes", data.notes);
 
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbxj0rciH5nNF625FAYHfYfj8eqUHam1cyWBqoHZyvFssqoCGkHEEBAB72gQWwdcxg3f/exec", {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbyih8RHw5VreUay97BCc6B7F1IE3wKWVqXFHfysyOOBb6KP427oUIJoR1xCZ0IPoOs/exec", {
       method: "POST",
       body: formData
     });
