@@ -188,13 +188,3 @@ document.getElementById("reviveForm").addEventListener("submit", function (e) {
   document.getElementById("suburb").innerHTML = '<option value="">--</option>';
   document.getElementById("revivePoint").innerHTML = '<option value="">--</option>';
 });
-ALSO add this once in your HTML (important)
-    } else {
-      status.textContent = "❌ Server error: " + text;
-    }
-
-  } catch (err) {
-    console.error(err);
-    status.textContent = "❌ Failed to send. Check console.";
-  }
-});
