@@ -151,7 +151,8 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
   const status = document.getElementById("status");
   status.textContent = "Sending...";
 
-  const formData = {
+  // 1. Collect form values once
+  const data = {
     playerName: this.querySelector('[name="playerName"]').value,
     profileLink: this.querySelector('[name="profileLink"]').value,
     sector: this.querySelector('[name="sector"]').value,
@@ -160,12 +161,23 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
     notes: this.querySelector('[name="notes"]').value
   };
 
+  // 2. Build FormData correctly
+  const formData = new FormData();
+  formData.append("playerName", data.playerName);
+  formData.append("profileLink", data.profileLink);
+  formData.append("sector", data.sector);
+  formData.append("suburb", data.suburb);
+  formData.append("location", data.revivePoint);
+  formData.append("notes", data.notes);
+
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbzhBt1aoa-pMwAnNYhsD09L9ar_lKmhUJLC7hc-mpEdgMkhK8yqCxsqNqaGZASbJ0bq/exec", {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbxhnF1lsJ9hl4IYjnzp6m2aW32r33WWuHiJNRchmFSYMLLlnQdU15vR4hnYe9pvwX0/exec", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData)
+      body: formData
     });
+
+    const text = await response.text();
+    console.log("Apps Script response:", text);
 
     if (response.ok) {
       status.textContent = "✅ Revive request sent!";
@@ -173,9 +185,11 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
       document.getElementById("suburb").innerHTML = '<option value="">--</option>';
       document.getElementById("revivePoint").innerHTML = '<option value="">--</option>';
     } else {
-      status.textContent = "❌ Something went wrong. Try again.";
+      status.textContent = "❌ Server error: " + text;
     }
-  catch (err) {
-  console.error("FULL ERROR:", err);
-  status.textContent = "❌ Error: " + err.message;
-}
+
+  } catch (err) {
+    console.error(err);
+    status.textContent = "❌ Failed to send. Check console.";
+  }
+});
