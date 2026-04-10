@@ -151,30 +151,30 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
   const status = document.getElementById("status");
   status.textContent = "Sending...";
 
-  // 1. Collect form values once
-  const data = {
-    playerName: this.querySelector('[name="playerName"]').value,
-    profileLink: this.querySelector('[name="profileLink"]').value,
-    sector: this.querySelector('[name="sector"]').value,
-    suburb: this.querySelector('[name="suburb"]').value,
-    revivePoint: this.querySelector('[name="revivePoint"]').value,
-    notes: this.querySelector('[name="notes"]').value
-  };
+  const playerName = this.querySelector('[name="playerName"]').value;
+  const profileLink = this.querySelector('[name="profileLink"]').value;
+  const sector = this.querySelector('[name="sector"]').value;
+  const suburb = this.querySelector('[name="suburb"]').value;
+  const revivePoint = this.querySelector('[name="revivePoint"]').value;
+  const notes = this.querySelector('[name="notes"]').value;
 
-  // 2. Build FormData correctly
-  const formData = new FormData();
-  formData.append("playerName", data.playerName);
-  formData.append("profileLink", data.profileLink);
-  formData.append("sector", data.sector);
-  formData.append("suburb", data.suburb);
-  formData.append("location", data.revivePoint);
-  formData.append("notes", data.notes);
+  // 🔥 CORS-SAFE PAYLOAD
+  const params = new URLSearchParams();
+  params.append("playerName", playerName);
+  params.append("profileLink", profileLink);
+  params.append("sector", sector);
+  params.append("suburb", suburb);
+  params.append("location", revivePoint);
+  params.append("notes", notes);
 
   try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbyih8RHw5VreUay97BCc6B7F1IE3wKWVqXFHfysyOOBb6KP427oUIJoR1xCZ0IPoOs/exec", {
-      method: "POST",
-      body: formData
-    });
+    const response = await fetch(
+      "https://script.google.com/macros/s/AKfycbyih8RHw5VreUay97BCc6B7F1IE3wKWVqXFHfysyOOBb6KP427oUIJoR1xCZ0IPoOs/exec",
+      {
+        method: "POST",
+        body: params
+      }
+    );
 
     const text = await response.text();
     console.log("Apps Script response:", text);
@@ -182,6 +182,7 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
     if (response.ok) {
       status.textContent = "✅ Revive request sent!";
       this.reset();
+
       document.getElementById("suburb").innerHTML = '<option value="">--</option>';
       document.getElementById("revivePoint").innerHTML = '<option value="">--</option>';
     } else {
