@@ -161,7 +161,7 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
   };
 
   try {
-    const response = await fetch("/.netlify/functions/revive", {
+    const response = await fetch("https://script.google.com/macros/s/AKfycbzhBt1aoa-pMwAnNYhsD09L9ar_lKmhUJLC7hc-mpEdgMkhK8yqCxsqNqaGZASbJ0bq/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData)
