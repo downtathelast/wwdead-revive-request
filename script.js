@@ -155,7 +155,7 @@ document.getElementById("reviveForm").addEventListener("submit", function (e) {
 
   const form = document.createElement("form");
   form.method = "POST";
-  form.action = "https://script.google.com/macros/s/AKfycbwP16CljL9pIHOXscCTuKK7dTAzhQSplTzNWukW2VBnuT_ebsdT8_mDvJCDTb358rZC/exec";
+  form.action = "https://script.google.com/macros/s/AKfycbwPz_tNLrVb84feWnKK_r5QEfjGpkztRofvR6VOCeYTKca9LNAQRziFY49XR9tLq_f2/exec";
   form.target = "hidden_iframe";
 
   const playerName = this.querySelector('[name="playerName"]').value;
