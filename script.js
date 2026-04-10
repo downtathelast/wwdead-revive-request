@@ -175,8 +175,7 @@ document.getElementById("reviveForm").addEventListener("submit", async function 
     } else {
       status.textContent = "❌ Something went wrong. Try again.";
     }
-  } catch (err) {
-    console.error(err);
-    status.textContent = "❌ Failed to send. Check your connection.";
-  }
-});
+  catch (err) {
+  console.error("FULL ERROR:", err);
+  status.textContent = "❌ Error: " + err.message;
+}
