@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
 let reviveData = {};
 
 // 🔥 LOAD REVIVE DATA FROM GOOGLE APPS SCRIPT
-fetch("https://script.google.com/macros/s/AKfycbwqsSGaKA0zTcwSbF8regABZFcXMpyg8gXrS7l_oDiWgb170_FuuXNZxlO7c3G0Gy5E/exec")
+fetch("https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec")
   .then(res => res.json())
   .then(data => {
     reviveData = data;
