@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-const suburbData = {
+const VALID_SUBURBS = {
   "Barrville": ["Knill Road"],
   "Brooke Hills": ["St. Pius's Church"],
   "Brooksville": ["Cemetery 34,65", "Cemetery 38,67", "The Culling Building", "Heal Walk"],
@@ -11,7 +11,7 @@ const suburbData = {
   "Dakerstown": ["Junkyard 6,7"],
   "Danversbank": ["Cemetery 73,97", "Angerstein Park"],
   "Dartside": ["The Abarrow Monument", "Corless Way", "Crumpler Road", "Lyng Street"],
-  "Darvall Heights": ["Edbrooke Street", "Salopia Row", "Cemetery 24,27", "Nurten Avenue"],
+  "Darvall Heights": ["Salopia Row", "SoC Maintained RP - Cemetery 24,27", "SoC Maintained RP - Nurten Avenue"],
   "Dentonside": ["Cemetery 97,57", "Cowdry Walk", "Cowley Walk"],
   "Dulston": ["Hamerton Road", "Duport Avenue", "Cemetery 99,2"],
   "Dunell Hills": ["Cemetery 8,38", "Hilborn Walk"],
@@ -155,7 +155,7 @@ document.getElementById("reviveForm").addEventListener("submit", function (e) {
 
   const form = document.createElement("form");
   form.method = "POST";
-  form.action = "https://script.google.com/macros/s/AKfycbwPz_tNLrVb84feWnKK_r5QEfjGpkztRofvR6VOCeYTKca9LNAQRziFY49XR9tLq_f2/exec";
+  form.action = "https://script.google.com/macros/s/AKfycbwqsSGaKA0zTcwSbF8regABZFcXMpyg8gXrS7l_oDiWgb170_FuuXNZxlO7c3G0Gy5E/exec";
   form.target = "hidden_iframe";
 
   const playerName = this.querySelector('[name="playerName"]').value;
