@@ -1,11 +1,23 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+  // Optional fallback maintainer map
   const revivePointMaintainers = {
     "Salopia Row": "Soldiers of Crossman",
     "Junkyard 6,7": "TheLast",
     "Knill Road": "NW Revive Team",
     "St. Pius's Church": "NE Revivers"
   };
+
+  // -----------------------------
+  // EXPECTED FROM EXTERNAL FILE
+  // -----------------------------
+  // This must exist BEFORE this script runs
+  // Example:
+  // const REVIVE_DATA = {
+  //   "Dakerstown": [
+  //     { name: "Junkyard 6,7", maintainer: "TheLast" }
+  //   ]
+  // };
 
   const sectorSuburbs = {
     NW: ["Chancelwood", "Dakerstown", "Darvall Heights", "Dulston", "Dunningwood", "Earletown", "Grigg Heights", "Heytown", "Judgewood", "Ketchelbank", "Lamport Hills", "Molebank", "Pescodside", "Roachtown", "Roftwood", "Ruddlebank", "Spracklingbank", "Starlingtown"],
@@ -25,15 +37,11 @@ document.addEventListener("DOMContentLoaded", function () {
   const formEl = document.getElementById("reviveForm");
   const statusEl = document.getElementById("status");
 
-  console.log("Revive UI loaded");
-
   // -----------------------------
   // SECTOR → SUBURB
   // -----------------------------
   sectorEl.addEventListener("change", function () {
     const sector = this.value;
-
-    console.log("Sector changed:", sector);
 
     suburbEl.innerHTML = '<option value="">--</option>';
     reviveEl.innerHTML = '<option value="">--</option>';
@@ -50,50 +58,26 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // -----------------------------
-  // SUBURB → REVIVE POINTS (DEBUG VERSION)
+  // SUBURB → REVIVE POINTS (NO FETCH)
   // -----------------------------
-  suburbEl.addEventListener("change", async function () {
+  suburbEl.addEventListener("change", function () {
     const suburb = this.value;
-
-    console.log("Suburb changed:", suburb);
 
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
 
     if (!suburb) return;
 
-    try {
-      console.log("Fetching revive points...");
+    const points = (typeof REVIVE_DATA !== "undefined" && REVIVE_DATA[suburb]) 
+      ? REVIVE_DATA[suburb]
+      : [];
 
-      const res = await fetch(
-        "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec"
-      );
-
-      console.log("HTTP status:", res.status);
-
-      const data = await res.json();
-
-      console.log("RAW SHEET DATA:", data);
-
-      const points = data[suburb];
-
-      if (!points) {
-        console.warn("❌ No data found for suburb:", suburb);
-        return;
-      }
-
-      points.forEach(p => {
-        const opt = document.createElement("option");
-        opt.value = p.name;
-        opt.textContent = p.name;
-        reviveEl.appendChild(opt);
-      });
-
-      console.log("Revive points loaded:", points.length);
-
-    } catch (err) {
-      console.error("❌ Failed to load revive points:", err);
-    }
+    points.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.name;
+      opt.textContent = p.name;
+      reviveEl.appendChild(opt);
+    });
   });
 
   // -----------------------------
@@ -102,18 +86,24 @@ document.addEventListener("DOMContentLoaded", function () {
   reviveEl.addEventListener("change", function () {
     const point = this.value;
 
-    console.log("Revive point selected:", point);
-
     if (!point) {
       maintainerEl.value = "";
       return;
     }
 
-    maintainerEl.value = revivePointMaintainers[point] || "Unknown";
+    const suburb = suburbEl.value;
+    const points = (typeof REVIVE_DATA !== "undefined" && REVIVE_DATA[suburb]) || [];
+
+    const match = points.find(p => p.name === point);
+
+    maintainerEl.value =
+      match?.maintainer ||
+      revivePointMaintainers[point] ||
+      "Unknown";
   });
 
   // -----------------------------
-  // FORM SUBMIT
+  // SUBMIT FORM
   // -----------------------------
   formEl.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -122,8 +112,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.createElement("form");
     form.method = "POST";
-    form.action =
-      "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec";
+    form.action = "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec";
     form.target = "hidden_iframe";
 
     function addField(name, value) {
@@ -152,7 +141,5 @@ document.addEventListener("DOMContentLoaded", function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
   });
-
-});
 
 });
