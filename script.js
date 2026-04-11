@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-  // Optional fallback (only used if sheet data is unavailable)
   const revivePointMaintainers = {
     "Salopia Row": "Soldiers of Crossman",
     "Junkyard 6,7": "TheLast",
@@ -26,11 +25,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const formEl = document.getElementById("reviveForm");
   const statusEl = document.getElementById("status");
 
+  console.log("Revive UI loaded");
+
   // -----------------------------
   // SECTOR → SUBURB
   // -----------------------------
   sectorEl.addEventListener("change", function () {
     const sector = this.value;
+
+    console.log("Sector changed:", sector);
 
     suburbEl.innerHTML = '<option value="">--</option>';
     reviveEl.innerHTML = '<option value="">--</option>';
@@ -47,10 +50,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // -----------------------------
-  // SUBURB → REVIVE POINTS (FROM GOOGLE SHEET)
+  // SUBURB → REVIVE POINTS (DEBUG VERSION)
   // -----------------------------
   suburbEl.addEventListener("change", async function () {
     const suburb = this.value;
+
+    console.log("Suburb changed:", suburb);
 
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
@@ -58,10 +63,24 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!suburb) return;
 
     try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec");
+      console.log("Fetching revive points...");
+
+      const res = await fetch(
+        "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec"
+      );
+
+      console.log("HTTP status:", res.status);
+
       const data = await res.json();
 
-      const points = data[suburb] || [];
+      console.log("RAW SHEET DATA:", data);
+
+      const points = data[suburb];
+
+      if (!points) {
+        console.warn("❌ No data found for suburb:", suburb);
+        return;
+      }
 
       points.forEach(p => {
         const opt = document.createElement("option");
@@ -70,28 +89,31 @@ document.addEventListener("DOMContentLoaded", function () {
         reviveEl.appendChild(opt);
       });
 
+      console.log("Revive points loaded:", points.length);
+
     } catch (err) {
-      console.error("Failed to load revive points:", err);
+      console.error("❌ Failed to load revive points:", err);
     }
   });
 
   // -----------------------------
-  // REVIVE POINT → MAINTAINER DISPLAY
+  // REVIVE POINT → MAINTAINER
   // -----------------------------
   reviveEl.addEventListener("change", function () {
     const point = this.value;
+
+    console.log("Revive point selected:", point);
 
     if (!point) {
       maintainerEl.value = "";
       return;
     }
 
-    // If using sheet system, this will be replaced later dynamically
     maintainerEl.value = revivePointMaintainers[point] || "Unknown";
   });
 
   // -----------------------------
-  // SUBMIT FORM
+  // FORM SUBMIT
   // -----------------------------
   formEl.addEventListener("submit", function (e) {
     e.preventDefault();
@@ -100,7 +122,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec";
+    form.action =
+      "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec";
     form.target = "hidden_iframe";
 
     function addField(name, value) {
@@ -129,5 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
   });
+
+});
 
 });
