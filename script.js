@@ -1,123 +1,133 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-let reviveData = {};
+  // Optional fallback (only used if sheet data is unavailable)
+  const revivePointMaintainers = {
+    "Salopia Row": "Soldiers of Crossman",
+    "Junkyard 6,7": "TheLast",
+    "Knill Road": "NW Revive Team",
+    "St. Pius's Church": "NE Revivers"
+  };
 
-// 🔥 LOAD REVIVE DATA FROM GOOGLE APPS SCRIPT
-fetch("https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec")
-  .then(res => res.json())
-  .then(data => {
-    reviveData = data;
-  })
-  .catch(err => console.error("Failed to load revive data:", err));
+  const sectorSuburbs = {
+    NW: ["Chancelwood", "Dakerstown", "Darvall Heights", "Dulston", "Dunningwood", "Earletown", "Grigg Heights", "Heytown", "Judgewood", "Ketchelbank", "Lamport Hills", "Molebank", "Pescodside", "Roachtown", "Roftwood", "Ruddlebank", "Spracklingbank", "Starlingtown"],
+    NE: ["Brooke Hills", "Brooksville", "Buttonville", "Chancelwood", "Dentonside", "Dulston", "Dunningwood", "East Boundwood", "Edgecombe", "Heytown", "Houldenbank", "Huntley Heights", "Judgewood", "Ketchelbank", "Lamport Hills", "Lerwill Heights", "Pescodside", "Rhodenbank", "Richmond Hills", "Roftwood", "Roachtown", "Santlerville", "Spracklingbank"],
+    SW: ["Crooketon", "Crowbank", "Dartside", "Dunell Hills", "East Grayside", "Foulkes Village", "Grigg Heights", "Kinch Heights", "Lerwill Heights", "Lockettside", "Lukinswood", "Molebank", "Mornington", "New Arkham", "North Blythville", "Owsleybank", "Reganbank", "Ruddlebank", "South Blythville", "Tapton", "West Grayside", "Wyke Hills"],
+    SE: ["Brooksville", "Buttonville", "Danversbank", "Dentonside", "Edgecombe", "Fryerbank", "Hollomstown", "Houldenbank", "Kempsterbank", "Kinch Heights", "Miltown", "Osmondville", "Paynterton", "Pegton", "Pennville", "Penny Heights", "Pitneybank", "Vinetown", "West Grayside", "Williamsville", "Wray Heights", "Wyke Hills"],
+    Central: ["Barrville", "Galbraith Hills", "Gatcombeton", "Greentown", "Havercroft", "Lamport Hills", "Mockridge Heights", "Roftwood", "Shackleville", "Stanbury Village", "Tapton", "West Grayside"]
+  };
 
+  // -----------------------------
+  // ELEMENTS
+  // -----------------------------
+  const sectorEl = document.getElementById("sector");
+  const suburbEl = document.getElementById("suburb");
+  const reviveEl = document.getElementById("revivePoint");
+  const maintainerEl = document.getElementById("maintainer");
+  const formEl = document.getElementById("reviveForm");
+  const statusEl = document.getElementById("status");
 
-// 🔥 SECTOR → SUBURBS
-const sectorSuburbs = {
-  NW: ["Chancelwood","Dakerstown","Darvall Heights","Dulston","Dunningwood","Earletown","Grigg Heights","Heytown","Judgewood","Ketchelbank","Lamport Hills","Molebank","Pescodside","Roachtown","Roftwood","Ruddlebank","Spracklingbank","Starlingtown"],
-  NE: ["Brooke Hills","Brooksville","Buttonville","Chancelwood","Dentonside","Dulston","Dunningwood","East Boundwood","Edgecombe","Heytown","Houldenbank","Huntley Heights","Judgewood","Ketchelbank","Lamport Hills","Lerwill Heights","Pescodside","Rhodenbank","Richmond Hills","Roftwood","Roachtown","Santlerville","Spracklingbank"],
-  SW: ["Crooketon","Crowbank","Dartside","Dunell Hills","East Grayside","Foulkes Village","Grigg Heights","Kinch Heights","Lerwill Heights","Lockettside","Lukinswood","Molebank","Mornington","New Arkham","North Blythville","Owsleybank","Reganbank","Ruddlebank","South Blythville","Tapton","West Grayside","Wyke Hills"],
-  SE: ["Brooksville","Buttonville","Danversbank","Dentonside","Edgecombe","Fryerbank","Hollomstown","Houldenbank","Kempsterbank","Kinch Heights","Miltown","Osmondville","Paynterton","Pegton","Pennville","Penny Heights","Pitneybank","Vinetown","West Grayside","Williamsville","Wray Heights","Wyke Hills"],
-  Central: ["Barrville","Galbraith Hills","Gatcombeton","Greentown","Havercroft","Lamport Hills","Mockridge Heights","Roftwood","Shackleville","Stanbury Village","Tapton","West Grayside"]
-};
+  // -----------------------------
+  // SECTOR → SUBURB
+  // -----------------------------
+  sectorEl.addEventListener("change", function () {
+    const sector = this.value;
 
+    suburbEl.innerHTML = '<option value="">--</option>';
+    reviveEl.innerHTML = '<option value="">--</option>';
+    maintainerEl.value = "";
 
-// 🔥 SECTOR CHANGE → LOAD SUBURBS
-document.getElementById("sector").addEventListener("change", function () {
-  const sector = this.value;
-  const suburbSelect = document.getElementById("suburb");
-  const revivePointSelect = document.getElementById("revivePoint");
-
-  suburbSelect.innerHTML = '<option value="">--</option>';
-  revivePointSelect.innerHTML = '<option value="">--</option>';
-  document.getElementById("maintainer").value = "";
-
-  if (!sectorSuburbs[sector]) return;
-
-  sectorSuburbs[sector].forEach(function (s) {
-    const opt = document.createElement("option");
-    opt.value = s;
-    opt.textContent = s;
-    suburbSelect.appendChild(opt);
+    if (sectorSuburbs[sector]) {
+      sectorSuburbs[sector].forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        suburbEl.appendChild(opt);
+      });
+    }
   });
-});
 
+  // -----------------------------
+  // SUBURB → REVIVE POINTS (FROM GOOGLE SHEET)
+  // -----------------------------
+  suburbEl.addEventListener("change", async function () {
+    const suburb = this.value;
 
-// 🔥 SUBURB CHANGE → LOAD REVIVE POINTS
-document.getElementById("suburb").addEventListener("change", function () {
-  const suburb = this.value;
-  const revivePointSelect = document.getElementById("revivePoint");
+    reviveEl.innerHTML = '<option value="">--</option>';
+    maintainerEl.value = "";
 
-  revivePointSelect.innerHTML = '<option value="">--</option>';
-  document.getElementById("maintainer").value = "";
+    if (!suburb) return;
 
-  if (!reviveData[suburb]) return;
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec");
+      const data = await res.json();
 
-  reviveData[suburb].forEach(function (rp) {
-    const opt = document.createElement("option");
-    opt.value = rp.name;
-    opt.textContent = rp.name;
-    revivePointSelect.appendChild(opt);
+      const points = data[suburb] || [];
+
+      points.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.name;
+        opt.textContent = p.name;
+        reviveEl.appendChild(opt);
+      });
+
+    } catch (err) {
+      console.error("Failed to load revive points:", err);
+    }
   });
-});
 
+  // -----------------------------
+  // REVIVE POINT → MAINTAINER DISPLAY
+  // -----------------------------
+  reviveEl.addEventListener("change", function () {
+    const point = this.value;
 
-// 🔥 REVIVE POINT CHANGE → SHOW MAINTAINER
-document.getElementById("revivePoint").addEventListener("change", function () {
-  const suburb = document.getElementById("suburb").value;
-  const selected = this.value;
+    if (!point) {
+      maintainerEl.value = "";
+      return;
+    }
 
-  const maintainerField = document.getElementById("maintainer");
-  maintainerField.value = "";
+    // If using sheet system, this will be replaced later dynamically
+    maintainerEl.value = revivePointMaintainers[point] || "Unknown";
+  });
 
-  if (!reviveData[suburb]) return;
+  // -----------------------------
+  // SUBMIT FORM
+  // -----------------------------
+  formEl.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  const rp = reviveData[suburb].find(r => r.name === selected);
+    statusEl.textContent = "Sending...";
 
-  if (rp && rp.maintainer) {
-    maintainerField.value = rp.maintainer;
-  } else {
-    maintainerField.value = "—";
-  }
-});
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec";
+    form.target = "hidden_iframe";
 
+    function addField(name, value) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = value;
+      form.appendChild(input);
+    }
 
-// 🔥 FORM SUBMISSION
-document.getElementById("reviveForm").addEventListener("submit", function (e) {
-  e.preventDefault();
+    addField("playerName", formEl.playerName.value);
+    addField("profileLink", formEl.profileLink.value);
+    addField("sector", sectorEl.value);
+    addField("suburb", suburbEl.value);
+    addField("location", reviveEl.value);
+    addField("notes", formEl.notes.value);
 
-  const status = document.getElementById("status");
-  status.textContent = "Sending...";
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
 
-  const form = document.createElement("form");
-  form.method = "POST";
-  form.action = "https://script.google.com/macros/s/AKfycbwqsSGaKA0zTcwSbF8regABZFcXMpyg8gXrS7l_oDiWgb170_FuuXNZxlO7c3G0Gy5E/exec";
-  form.target = "hidden_iframe";
+    statusEl.textContent = "✅ Revive request sent!";
+    formEl.reset();
 
-  function addField(name, value) {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    form.appendChild(input);
-  }
-
-  addField("playerName", this.playerName.value);
-  addField("profileLink", this.profileLink.value);
-  addField("sector", this.sector.value);
-  addField("suburb", this.suburb.value);
-  addField("location", this.revivePoint.value);
-  addField("notes", this.notes.value);
-
-  document.body.appendChild(form);
-  form.submit();
-  form.remove();
-
-  status.textContent = "✅ Revive request sent!";
-  this.reset();
-
-  document.getElementById("suburb").innerHTML = '<option value="">--</option>';
-  document.getElementById("revivePoint").innerHTML = '<option value="">--</option>';
-  document.getElementById("maintainer").value = "";
-});
+    suburbEl.innerHTML = '<option value="">--</option>';
+    reviveEl.innerHTML = '<option value="">--</option>';
+    maintainerEl.value = "";
+  });
 
 });
