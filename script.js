@@ -1,6 +1,10 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
 
-  // Optional fallback maintainer map
+  const REVIVE_API =
+    "https://script.google.com/macros/s/AKfycbxlTTrHHJDE8D9Chh7I7kIMT5-3S0rgcg7QD5e11IU2bx0Apfotk00lfmngZhhR4Xlk/exec";
+
+  let REVIVE_DATA = {};
+
   const revivePointMaintainers = {
     "Salopia Row": "Soldiers of Crossman",
     "Junkyard 6,7": "TheLast",
@@ -9,16 +13,27 @@ document.addEventListener("DOMContentLoaded", function () {
   };
 
   const sectorSuburbs = {
-    NW: ["Chancelwood", "Dakerstown", "Darvall Heights", "Dulston", "Dunningwood", "Earletown", "Grigg Heights", "Heytown", "Judgewood", "Ketchelbank", "Lamport Hills", "Molebank", "Pescodside", "Roachtown", "Roftwood", "Ruddlebank", "Spracklingbank", "Starlingtown"],
-    NE: ["Brooke Hills", "Brooksville", "Buttonville", "Chancelwood", "Dentonside", "Dulston", "Dunningwood", "East Boundwood", "Edgecombe", "Heytown", "Houldenbank", "Huntley Heights", "Judgewood", "Ketchelbank", "Lamport Hills", "Lerwill Heights", "Pescodside", "Rhodenbank", "Richmond Hills", "Roftwood", "Roachtown", "Santlerville", "Spracklingbank"],
-    SW: ["Crooketon", "Crowbank", "Dartside", "Dunell Hills", "East Grayside", "Foulkes Village", "Grigg Heights", "Kinch Heights", "Lerwill Heights", "Lockettside", "Lukinswood", "Molebank", "Mornington", "New Arkham", "North Blythville", "Owsleybank", "Reganbank", "Ruddlebank", "South Blythville", "Tapton", "West Grayside", "Wyke Hills"],
-    SE: ["Brooksville", "Buttonville", "Danversbank", "Dentonside", "Edgecombe", "Fryerbank", "Hollomstown", "Houldenbank", "Kempsterbank", "Kinch Heights", "Miltown", "Osmondville", "Paynterton", "Pegton", "Pennville", "Penny Heights", "Pitneybank", "Vinetown", "West Grayside", "Williamsville", "Wray Heights", "Wyke Hills"],
-    Central: ["Barrville", "Galbraith Hills", "Gatcombeton", "Greentown", "Havercroft", "Lamport Hills", "Mockridge Heights", "Roftwood", "Shackleville", "Stanbury Village", "Tapton", "West Grayside"]
+    NW: ["Chancelwood","Dakerstown","Darvall Heights","Dulston","Dunningwood","Earletown","Grigg Heights","Heytown","Judgewood","Ketchelbank","Lamport Hills","Molebank","Pescodside","Roachtown","Roftwood","Ruddlebank","Spracklingbank","Starlingtown"],
+    NE: ["Brooke Hills","Brooksville","Buttonville","Chancelwood","Dentonside","Dulston","Dunningwood","East Boundwood","Edgecombe","Heytown","Houldenbank","Huntley Heights","Judgewood","Ketchelbank","Lamport Hills","Lerwill Heights","Pescodside","Rhodenbank","Richmond Hills","Roftwood","Roachtown","Santlerville","Spracklingbank"],
+    SW: ["Crooketon","Crowbank","Dartside","Dunell Hills","East Grayside","Foulkes Village","Grigg Heights","Kinch Heights","Lerwill Heights","Lockettside","Lukinswood","Molebank","Mornington","New Arkham","North Blythville","Owsleybank","Reganbank","Ruddlebank","South Blythville","Tapton","West Grayside","Wyke Hills"],
+    SE: ["Brooksville","Buttonville","Danversbank","Dentonside","Edgecombe","Fryerbank","Hollomstown","Houldenbank","Kempsterbank","Kinch Heights","Miltown","Osmondville","Paynterton","Pegton","Pennville","Penny Heights","Pitneybank","Vinetown","West Grayside","Williamsville","Wray Heights","Wyke Hills"],
+    Central: ["Barrville","Galbraith Hills","Gatcombeton","Greentown","Havercroft","Lamport Hills","Mockridge Heights","Roftwood","Shackleville","Stanbury Village","Tapton","West Grayside"]
   };
 
-  // -----------------------------
+  // -----------------------
+  // LOAD REVIVE DATA (IMPORTANT FIX)
+  // -----------------------
+  try {
+    const res = await fetch(REVIVE_API);
+    REVIVE_DATA = await res.json();
+    console.log("REVIVE_DATA loaded:", REVIVE_DATA);
+  } catch (err) {
+    console.error("Failed to load REVIVE_DATA:", err);
+  }
+
+  // -----------------------
   // ELEMENTS
-  // -----------------------------
+  // -----------------------
   const sectorEl = document.getElementById("sector");
   const suburbEl = document.getElementById("suburb");
   const reviveEl = document.getElementById("revivePoint");
@@ -26,9 +41,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const formEl = document.getElementById("reviveForm");
   const statusEl = document.getElementById("status");
 
-  // -----------------------------
+  // -----------------------
   // SECTOR → SUBURB
-  // -----------------------------
+  // -----------------------
   sectorEl.addEventListener("change", function () {
     const sector = this.value;
 
@@ -36,33 +51,33 @@ document.addEventListener("DOMContentLoaded", function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
 
-    (sectorSuburbs[sector] || []).forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s;
-      opt.textContent = s;
-      suburbEl.appendChild(opt);
-    });
+    if (sectorSuburbs[sector]) {
+      sectorSuburbs[sector].forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s;
+        opt.textContent = s;
+        suburbEl.appendChild(opt);
+      });
+    }
   });
 
-  // -----------------------------
-  // SUBURB → REVIVE POINTS
-  // -----------------------------
+  // -----------------------
+  // SUBURB → REVIVE POINT
+  // -----------------------
   suburbEl.addEventListener("change", function () {
     const suburb = this.value;
 
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
 
-    if (!suburb) return;
+    const points = REVIVE_DATA[suburb] || [];
 
-    const data = (typeof REVIVE_DATA !== "undefined") ? REVIVE_DATA : null;
-
-    if (!data || !data[suburb]) {
-      console.warn("REVIVE_DATA missing or suburb not found:", suburb);
+    if (!points.length) {
+      console.warn("No revive points for:", suburb);
       return;
     }
 
-    data[suburb].forEach(p => {
+    points.forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.name;
       opt.textContent = p.name;
@@ -70,23 +85,14 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // -----------------------------
-  // REVIVE POINT → MAINTAINER
-  // -----------------------------
+  // -----------------------
+  // REVIVE → MAINTAINER
+  // -----------------------
   reviveEl.addEventListener("change", function () {
+    const suburb = suburbEl.value;
     const point = this.value;
 
-    if (!point) {
-      maintainerEl.value = "";
-      return;
-    }
-
-    const suburb = suburbEl.value;
-    const data = (typeof REVIVE_DATA !== "undefined") ? REVIVE_DATA : null;
-
-    const points = data?.[suburb] || [];
-
-    const match = points.find(p => p.name === point);
+    const match = (REVIVE_DATA[suburb] || []).find(p => p.name === point);
 
     maintainerEl.value =
       match?.maintainer ||
@@ -94,9 +100,9 @@ document.addEventListener("DOMContentLoaded", function () {
       "Unknown";
   });
 
-  // -----------------------------
-  // SUBMIT FORM
-  // -----------------------------
+  // -----------------------
+  // SUBMIT
+  // -----------------------
   formEl.addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -104,23 +110,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const form = document.createElement("form");
     form.method = "POST";
-    form.action = "https://script.google.com/macros/s/AKfycbzoQy6STaMnIh6Y8pda03PV0PdokBB1y_ejCFf_z1QhdjajZKpW0MxmLCXErgezruV4/exec";
+    form.action = REVIVE_API;
     form.target = "hidden_iframe";
 
-    function addField(name, value) {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      input.value = value;
-      form.appendChild(input);
+    function add(n, v) {
+      const i = document.createElement("input");
+      i.type = "hidden";
+      i.name = n;
+      i.value = v;
+      form.appendChild(i);
     }
 
-    addField("playerName", formEl.playerName.value);
-    addField("profileLink", formEl.profileLink.value);
-    addField("sector", sectorEl.value);
-    addField("suburb", suburbEl.value);
-    addField("location", reviveEl.value);
-    addField("notes", formEl.notes.value);
+    add("playerName", formEl.playerName.value);
+    add("profileLink", formEl.profileLink.value);
+    add("sector", sectorEl.value);
+    add("suburb", suburbEl.value);
+    add("location", reviveEl.value);
+    add("notes", formEl.notes.value);
 
     document.body.appendChild(form);
     form.submit();
@@ -133,5 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
   });
+
+});
 
 });
