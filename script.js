@@ -139,5 +139,4 @@ document.addEventListener("DOMContentLoaded", async function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
   });
-
 });
