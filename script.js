@@ -1,5 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+const revivePointMaintainers = {
+  "Salopia Row": "Soldiers of Crossman",
+  "Junkyard 6,7": "TheLast",
+  "Knill Road": "NW Revive Team",
+  "St. Pius's Church": "NE Revivers"
+};
+
 const VALID_SUBURBS = {
   "Barrville": ["Knill Road"],
   "Brooke Hills": ["St. Pius's Church"],
@@ -11,7 +18,7 @@ const VALID_SUBURBS = {
   "Dakerstown": ["Junkyard 6,7"],
   "Danversbank": ["Cemetery 73,97", "Angerstein Park"],
   "Dartside": ["The Abarrow Monument", "Corless Way", "Crumpler Road", "Lyng Street"],
-  "Darvall Heights": ["Salopia Row", "SoC Maintained RP - Cemetery 24,27", "SoC Maintained RP - Nurten Avenue"],
+  "Darvall Heights": ["Salopia Row", "Cemetery 24,27", "Nurten Avenue"],
   "Dentonside": ["Cemetery 97,57", "Cowdry Walk", "Cowley Walk"],
   "Dulston": ["Hamerton Road", "Duport Avenue", "Cemetery 99,2"],
   "Dunell Hills": ["Cemetery 8,38", "Hilborn Walk"],
