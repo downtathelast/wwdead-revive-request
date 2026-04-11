@@ -8,17 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
     "St. Pius's Church": "NE Revivers"
   };
 
-  // -----------------------------
-  // EXPECTED FROM EXTERNAL FILE
-  // -----------------------------
-  // This must exist BEFORE this script runs
-  // Example:
-  // const REVIVE_DATA = {
-  //   "Dakerstown": [
-  //     { name: "Junkyard 6,7", maintainer: "TheLast" }
-  //   ]
-  // };
-
   const sectorSuburbs = {
     NW: ["Chancelwood", "Dakerstown", "Darvall Heights", "Dulston", "Dunningwood", "Earletown", "Grigg Heights", "Heytown", "Judgewood", "Ketchelbank", "Lamport Hills", "Molebank", "Pescodside", "Roachtown", "Roftwood", "Ruddlebank", "Spracklingbank", "Starlingtown"],
     NE: ["Brooke Hills", "Brooksville", "Buttonville", "Chancelwood", "Dentonside", "Dulston", "Dunningwood", "East Boundwood", "Edgecombe", "Heytown", "Houldenbank", "Huntley Heights", "Judgewood", "Ketchelbank", "Lamport Hills", "Lerwill Heights", "Pescodside", "Rhodenbank", "Richmond Hills", "Roftwood", "Roachtown", "Santlerville", "Spracklingbank"],
@@ -47,18 +36,16 @@ document.addEventListener("DOMContentLoaded", function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
 
-    if (sectorSuburbs[sector]) {
-      sectorSuburbs[sector].forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        suburbEl.appendChild(opt);
-      });
-    }
+    (sectorSuburbs[sector] || []).forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      suburbEl.appendChild(opt);
+    });
   });
 
   // -----------------------------
-  // SUBURB → REVIVE POINTS (NO FETCH)
+  // SUBURB → REVIVE POINTS
   // -----------------------------
   suburbEl.addEventListener("change", function () {
     const suburb = this.value;
@@ -68,11 +55,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!suburb) return;
 
-    const points = (typeof REVIVE_DATA !== "undefined" && REVIVE_DATA[suburb]) 
-      ? REVIVE_DATA[suburb]
-      : [];
+    const data = (typeof REVIVE_DATA !== "undefined") ? REVIVE_DATA : null;
 
-    points.forEach(p => {
+    if (!data || !data[suburb]) {
+      console.warn("REVIVE_DATA missing or suburb not found:", suburb);
+      return;
+    }
+
+    data[suburb].forEach(p => {
       const opt = document.createElement("option");
       opt.value = p.name;
       opt.textContent = p.name;
@@ -92,7 +82,9 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     const suburb = suburbEl.value;
-    const points = (typeof REVIVE_DATA !== "undefined" && REVIVE_DATA[suburb]) || [];
+    const data = (typeof REVIVE_DATA !== "undefined") ? REVIVE_DATA : null;
+
+    const points = data?.[suburb] || [];
 
     const match = points.find(p => p.name === point);
 
@@ -141,5 +133,7 @@ document.addEventListener("DOMContentLoaded", function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
   });
+
+});
 
 });
