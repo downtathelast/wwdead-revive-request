@@ -9,6 +9,7 @@
 
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <form id="reviveForm">
@@ -34,13 +35,13 @@
       <option value="">--</option>
     </select>
 
-  <label>REVIVE POINT</label>
-<select id="revivePoint" name="revivePoint" required>
-  <option value="">--</option>
-</select>
+    <label>REVIVE POINT</label>
+    <select id="revivePoint" name="revivePoint" required>
+      <option value="">--</option>
+    </select>
 
-<label>MAINTAINED BY</label>
-<input type="text" id="maintainer" readonly>
+    <label>MAINTAINED BY</label>
+    <input type="text" id="maintainer" readonly>
 
     <label>NOTES</label>
     <input type="text" name="notes">
@@ -50,7 +51,18 @@
   </form>
 
   <p id="status"></p>
-<iframe name="hidden_iframe" style="display:none;"></iframe>
+
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+
+  <!-- ===================================== -->
+  <!-- 🔥 LOAD REVIVE DATA FIRST (IMPORTANT) -->
+  <!-- ===================================== -->
+  <script src="YOUR_APPS_SCRIPT_WEB_APP_URL_HERE"></script>
+
+  <!-- ===================================== -->
+  <!-- 🔥 YOUR APP LOGIC -->
+  <!-- ===================================== -->
   <script src="script.js"></script>
+
 </body>
 </html>
