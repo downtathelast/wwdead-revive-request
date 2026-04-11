@@ -1,9 +1,10 @@
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
 
   const REVIVE_API =
     "https://script.google.com/macros/s/AKfycbxlTTrHHJDE8D9Chh7I7kIMT5-3S0rgcg7QD5e11IU2bx0Apfotk00lfmngZhhR4Xlk/exec";
 
-  let REVIVE_DATA = {};
+  // 🔥 MUST BE LOADED FROM revive-data.js
+  const REVIVE_DATA = window.REVIVE_DATA || {};
 
   const revivePointMaintainers = {
     "Salopia Row": "Soldiers of Crossman",
@@ -20,20 +21,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     Central: ["Barrville","Galbraith Hills","Gatcombeton","Greentown","Havercroft","Lamport Hills","Mockridge Heights","Roftwood","Shackleville","Stanbury Village","Tapton","West Grayside"]
   };
 
-  // -----------------------
-  // LOAD REVIVE DATA (IMPORTANT FIX)
-  // -----------------------
-  try {
-    const res = await fetch(REVIVE_API);
-    REVIVE_DATA = await res.json();
-    console.log("REVIVE_DATA loaded:", REVIVE_DATA);
-  } catch (err) {
-    console.error("Failed to load REVIVE_DATA:", err);
-  }
-
-  // -----------------------
-  // ELEMENTS
-  // -----------------------
   const sectorEl = document.getElementById("sector");
   const suburbEl = document.getElementById("suburb");
   const reviveEl = document.getElementById("revivePoint");
@@ -51,14 +38,12 @@ document.addEventListener("DOMContentLoaded", async function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
 
-    if (sectorSuburbs[sector]) {
-      sectorSuburbs[sector].forEach(s => {
-        const opt = document.createElement("option");
-        opt.value = s;
-        opt.textContent = s;
-        suburbEl.appendChild(opt);
-      });
-    }
+    (sectorSuburbs[sector] || []).forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      suburbEl.appendChild(opt);
+    });
   });
 
   // -----------------------
@@ -71,11 +56,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     maintainerEl.value = "";
 
     const points = REVIVE_DATA[suburb] || [];
-
-    if (!points.length) {
-      console.warn("No revive points for:", suburb);
-      return;
-    }
 
     points.forEach(p => {
       const opt = document.createElement("option");
@@ -113,13 +93,13 @@ document.addEventListener("DOMContentLoaded", async function () {
     form.action = REVIVE_API;
     form.target = "hidden_iframe";
 
-    function add(n, v) {
+    const add = (n, v) => {
       const i = document.createElement("input");
       i.type = "hidden";
       i.name = n;
       i.value = v;
       form.appendChild(i);
-    }
+    };
 
     add("playerName", formEl.playerName.value);
     add("profileLink", formEl.profileLink.value);
@@ -139,4 +119,5 @@ document.addEventListener("DOMContentLoaded", async function () {
     reviveEl.innerHTML = '<option value="">--</option>';
     maintainerEl.value = "";
   });
+
 });
