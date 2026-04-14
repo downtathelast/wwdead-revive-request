@@ -1,5 +1,5 @@
 const API =
-"https://script.google.com/macros/s/AKfycbwuyxqKSXNRI4SmOcy8-aeDxi1bgKvGcI-0OGbZjjmGJIjL6AzLImEL1nORZUC2arWq/exec?view=unmaintained";
+"https://script.google.com/macros/s/AKfycbxhqT5XvnJ3IT7T2yERZBcdbWx5x5iQt7b5LXs742YyE3Vim2eS8ystobNmEg5ZoePo/exec?view=unmaintained";
 
 fetch(API)
   .then(r => r.json())
