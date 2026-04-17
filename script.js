@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const statusEl = document.getElementById("status");
 
   const REVIVE_API =
-    "https://script.google.com/macros/s/AKfycbznXaVqaeJY4yYL3s3AqBnPymxvTMuiAZVLlcpIbWU94Fk13XCstyH1rytf-MEm5HFY/exec";
+    "https://script.google.com/macros/s/AKfycbxhqT5XvnJ3IT7T2yERZBcdbWx5x5iQt7b5LXs742YyE3Vim2eS8ystobNmEg5ZoePo/exec";
 
   // -----------------------------
   // SECTOR → SUBURB MAP (STATIC)
