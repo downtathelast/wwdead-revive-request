@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("REVIVE_DATA_READY", function () {
 
   // -----------------------------
   // SAFETY CHECK
