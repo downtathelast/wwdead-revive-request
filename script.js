@@ -27,12 +27,12 @@ document.addEventListener("REVIVE_DATA_READY", function () {
   // SECTOR → SUBURB MAP (STATIC)
   // -----------------------------
   const sectorSuburbs = {
-    NW: ["Dakerstown","Jensentown","Quarlesbank","West Boundwood","East Boundwood","Roywood","Judgewood","Gatcombeton","Shuttlebank","Yagoton","Peddlesden Village","Chudleyton","Darvall Heights","Eastonwood","Brooke Hills","Dunell Hills","West Becktown","East Becktown","Owsleybank","Molebank","Lukinswood"],
-    NE: ["Lamport Hills","Chancelwood","Earletown","Rhodenbank","Dulston","Millen Hills","Raines Hills","Pashenton","Rolt Heights","Pescodside","Shearbank","Huntley Heights","Santlerville","Gibsonton","Dunningwood","Heytown","Spracklingbank","Paynterton","Peppardville","Pitneybank","Starlingtown"],
-    SW: ["Grigg Heights","Reganbank","Lerwill Heights","Crooketown","Mornington","North Blythville","Nixbank","Wykewood","South Blythville","Greentown","Tapton","Foulkes Village","Ruddlebank","Lockettside","Dartside","Kinch Heights","New Arkham","Old Arkham","Spicer Hills","Williamsville","Buttonville"],
-    SE: ["Edgecombe","Pegton","Dentonside","Crowbank","Vinetown","Houldenbank","Kempsterbank","Wray Heights","Gulsonside","Osmondville","Penny Heights","West Grayside","East Grayside","Scarletwood","Pennville","Fryerbank","Wyke Hills","Hollomstown","Danversbank","Whittenside","Miltown"],
-    Central: ["Richmond Hills","Ketchelbank","Roachtown","Randallbank","Havercroft","Barrville","Ridleybank","Pimbank","Shore Hills","Galbraith Hills","Stanbury Village","Roftwood","Brooksville","Mockridge Heights","Shackleville","Tollyton"]
-  };
+  NW: ["Dakerstown","Jensentown","Quarlesbank","West Boundwood","East Boundwood","Roywood","Judgewood","Gatcombeton","Shuttlebank","Yagoton","Peddlesden Village","Chudleyton","Darvall Heights","Eastonwood","Brooke Hills","Dunell Hills","West Becktown","East Becktown","Owsleybank","Molebank","Lukinswood"],
+  NE: ["Lamport Hills","Chancelwood","Earletown","Rhodenbank","Dulston","Millen Hills","Raines Hills","Pashenton","Rolt Heights","Pescodside","Shearbank","Huntley Heights","Santlerville","Gibsonton","Dunningwood","Heytown","Spracklingbank","Paynterton","Peppardville","Pitneybank","Starlingtown"],
+  SW: ["Grigg Heights","Reganbank","Lerwill Heights","Crooketown","Mornington","North Blythville","Nixbank","Wykewood","South Blythville","Greentown","Tapton","Foulkes Village","Ruddlebank","Lockettside","Dartside","Kinch Heights","New Arkham","Old Arkham","Spicer Hills","Williamsville","Buttonville"],
+  SE: ["Edgecombe","Pegton","Dentonside","Crowbank","Vinetown","Houldenbank","Kempsterbank","Wray Heights","Gulsonside","Osmondville","Penny Heights","West Grayside","East Grayside","Scarletwood","Pennville","Fryerbank","Wyke Hills","Hollomstown","Danversbank","Whittenside","Miltown"],
+  Central: ["Richmond Hills","Ketchelbank","Roachtown","Randallbank","Havercroft","Barrville","Ridleybank","Pimbank","Shore Hills","Galbraith Hills","Stanbury Village","Roftwood","Brooksville","Mockridge Heights","Shackleville","Tollyton"]
+};
   // -----------------------------
   // SECTOR → SUBURB
   // -----------------------------
