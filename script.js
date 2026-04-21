@@ -32,7 +32,7 @@ document.addEventListener("REVIVE_DATA_READY", function () {
     SW: ["Grigg Heights","Reganbank","Lerwill Heights","Crooketown","Mornington","North Blythville","Nixbank","Wykewood","South Blythville","Greentown","Tapton","Foulkes Village","Ruddlebank","Lockettside","Dartside","Kinch Heights","New Arkham","Old Arkham","Spicer Hills","Williamsville","Buttonville"],
     SE: ["Edgecombe","Pegton","Dentonside","Crowbank","Vinetown","Houldenbank","Kempsterbank","Wray Heights","Gulsonside","Osmondville","Penny Heights","West Grayside","East Grayside","Scarletwood","Pennville","Fryerbank","Wyke Hills","Hollomstown","Danversbank","Whittenside","Miltown"],
     Central: ["Richmond Hills","Ketchelbank","Roachtown","Randallbank","Havercroft","Barrville","Ridleybank","Pimbank","Shore Hills","Galbraith Hills","Stanbury Village","Roftwood","Brooksville","Mockridge Heights","Shackleville","Tollyton"],
-
+  };
   // -----------------------------
   // SECTOR → SUBURB
   // -----------------------------
