@@ -57,31 +57,42 @@ document.addEventListener("REVIVE_DATA_READY", function () {
   // -----------------------------
   // SUBURB → REVIVE POINTS
   // -----------------------------
-  suburbEl.addEventListener("change", function () {
+suburbEl.addEventListener("change", function () {
 
-    const suburb = this.value.trim();
+  const suburb = this.value.trim();
 
-    reviveEl.innerHTML = '<option value="">--</option>';
-    maintainerEl.value = "";
+  // reset UI
+  reviveEl.innerHTML = '<option value="">--</option>';
+  maintainerEl.value = "";
 
-    console.log("➡ Suburb selected:", suburb);
+  console.log("SUBURB SELECTED:", JSON.stringify(suburb));
+  console.log("HAS KEY:", suburb in REVIVE_DATA);
+  console.log("RAW DATA ENTRY:", REVIVE_DATA[suburb]);
 
-    const points = REVIVE_DATA[suburb];
+  const points = REVIVE_DATA[suburb];
 
-    if (!points) {
-      console.warn("❌ No revive points found for:", suburb);
-      return;
-    }
+  // missing data
+  if (!points) {
+    console.warn("❌ No revive data found for:", suburb);
+    return;
+  }
 
-    points.forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.name;
-      opt.textContent = p.name;
-      reviveEl.appendChild(opt);
-    });
+  // wrong format safety check
+  if (!Array.isArray(points)) {
+    console.error("❌ Revive data is not an array:", points);
+    return;
+  }
 
-    console.log("✅ Loaded revive points:", points.length);
+  // populate dropdown
+  points.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.name;
+    opt.textContent = p.name;
+    reviveEl.appendChild(opt);
   });
+
+  console.log("✅ Loaded revive points:", points.length);
+});
 
   // -----------------------------
   // REVIVE POINT → MAINTAINER
