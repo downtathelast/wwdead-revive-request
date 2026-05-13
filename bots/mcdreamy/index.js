@@ -35,7 +35,7 @@ VALIDATION
 */
 if (!process.env.TOKEN) throw new Error("Missing TOKEN");
 if (!LEADERBOARD_CHANNEL_ID) throw new Error("Missing LEADERBOARD_CHANNEL_ID");
-if (!TOP_ROLE_ID) console.warn("⚠️ No TOP_RESPONDER_ROLE_ID set (role system disabled)");
+if (!TOP_ROLE_ID) console.warn("⚠️ TOP_RESPONDER_ROLE_ID not set (role system disabled)");
 
 /*
 =====================================
@@ -174,7 +174,7 @@ async function updateLeaderboard() {
             }
         );
     });
-};
+}
 
 /*
 =====================================
@@ -195,32 +195,41 @@ async function checkSeasonReset() {
         if (row.value === current) return;
 
         const channel = await client.channels.fetch(LEADERBOARD_CHANNEL_ID);
+        if (!channel) return;
 
         const topUser = await getTopUser();
-
         const guild = channel.guild;
-
-        let oldMVP = null;
-
-        if (TOP_ROLE_ID) {
-            await guild.members.fetch();
-
-            for (const member of guild.members.cache.values()) {
-                if (member.roles.cache.has(TOP_ROLE_ID)) {
-                    oldMVP = member;
-                    await member.roles.remove(TOP_ROLE_ID).catch(() => {});
-                }
-            }
-        }
 
         let newMVP = null;
 
+        /*
+        =====================================
+        REMOVE OLD MVP ROLE
+        =====================================
+        */
+        if (TOP_ROLE_ID) {
+            try {
+                const members = await guild.members.fetch();
+                const oldMVP = members.find(m => m.roles.cache.has(TOP_ROLE_ID));
+
+                if (oldMVP) {
+                    await oldMVP.roles.remove(TOP_ROLE_ID).catch(() => {});
+                }
+            } catch (e) {
+                console.error("Failed removing old MVP:", e);
+            }
+        }
+
+        /*
+        =====================================
+        ASSIGN NEW MVP ROLE
+        =====================================
+        */
         if (topUser && TOP_ROLE_ID) {
             try {
-                newMVP = await guild.members.fetch(topUser.user_id);
-                if (newMVP) {
-                    await newMVP.roles.add(TOP_ROLE_ID);
-                }
+                const member = await guild.members.fetch(topUser.user_id);
+                await member.roles.add(TOP_ROLE_ID);
+                newMVP = member;
             } catch (e) {
                 console.error("MVP role assignment failed:", e);
             }
@@ -232,11 +241,11 @@ async function checkSeasonReset() {
                     .setTitle(`🏁 Season Complete — ${row.value}`)
                     .setDescription(
 `**🏆 MVP**
-${topUser || 'None'}
+${topUser ? `${topUser.username} — ${topUser.points}` : 'None'}
 
-${newMVP ? `Role assigned to ${newMVP.user.username}` : ''}
+${newMVP ? `🎖 Role assigned to ${newMVP.user.username}` : ''}
 
-A new quarter has started. All scores reset.`
+A new quarter has started. All scores have been reset.`
                     )
             ]
         });
@@ -248,7 +257,7 @@ A new quarter has started. All scores reset.`
 
 /*
 =====================================
-REACTIONS
+REACTION TRACKING
 =====================================
 */
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -331,14 +340,14 @@ UTILS
 */
 function buildEmbed(boardText) {
     return new EmbedBuilder()
-        .setTitle(`💉 Quarterly Top Responder Tracking — ${getSeasonKey()}`)
+        .setTitle(`💉 Top Responder Leaderboard — ${getSeasonKey()}`)
         .setDescription(
 `**What this is**
-Tracks 💉 reactions across the server each quarter.
+Tracks completed revives across each quarter.
 
 **How it works**
-- React to revive request with 💉 to earn points
-- Each revive request will count only once
+- Once a reive is complete respond to the request with a 💉 emoji to earn points
+- Each message counts once per user
 - Scores reset every quarter
 - Abusing the system can result in a ban
 
@@ -357,7 +366,7 @@ async function getTopUser() {
         db.get(
             `SELECT user_id, username, points FROM leaderboard ORDER BY points DESC LIMIT 1`,
             (err, row) => {
-                res(row ? `${row.username} — ${row.points}` : null);
+                res(row || null);
             }
         );
     });
