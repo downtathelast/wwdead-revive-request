@@ -11,8 +11,12 @@ const {
     SlashCommandBuilder
 } = require('discord.js');
 
+require('dotenv').config();
+
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('/data/mcdreamy.db');
+
+db.run(`CREATE TABLE IF NOT EXISTS leaderboard (...)`);
 
 /*
 =====================================
