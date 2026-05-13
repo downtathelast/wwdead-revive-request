@@ -1,12 +1,14 @@
 require('dotenv').config();
-db.run(`DELETE FROM config WHERE key='leaderboard_message'`);
 
 const {
     Client,
     GatewayIntentBits,
     Partials,
     EmbedBuilder,
-    PermissionsBitField
+    PermissionsBitField,
+    REST,
+    Routes,
+    SlashCommandBuilder
 } = require('discord.js');
 
 const sqlite3 = require('sqlite3').verbose();
@@ -85,6 +87,29 @@ db.run(`CREATE TABLE IF NOT EXISTS seasons (
 
 /*
 =====================================
+SLASH COMMAND REGISTRATION
+=====================================
+*/
+async function registerCommands() {
+    const commands = [
+        new SlashCommandBuilder()
+            .setName('reset-leaderboard')
+            .setDescription('Reset leaderboard (Admin only)')
+            .toJSON()
+    ];
+
+    const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
+
+    await rest.put(
+        Routes.applicationCommands(client.user.id),
+        { body: commands }
+    );
+
+    console.log("Slash commands registered.");
+}
+
+/*
+=====================================
 SEASON HELPERS
 =====================================
 */
@@ -102,11 +127,52 @@ READY
 client.once('ready', async () => {
     console.log(`💉 Online as ${client.user.tag}`);
 
+    await registerCommands();
+
     await ensureLeaderboardMessage();
     await checkSeasonReset();
     await updateLeaderboard();
 
     setInterval(checkSeasonReset, 60 * 60 * 1000);
+});
+
+/*
+=====================================
+SLASH COMMAND HANDLER
+=====================================
+*/
+client.on('interactionCreate', async (interaction) => {
+    if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName !== 'reset-leaderboard') return;
+
+    if (!interaction.memberPermissions.has(PermissionsBitField.Flags.Administrator)) {
+        return interaction.reply({
+            content: "❌ Admin only.",
+            ephemeral: true
+        });
+    }
+
+    try {
+        await interaction.reply({ content: "Resetting leaderboard...", ephemeral: true });
+
+        db.run(`UPDATE leaderboard SET points = 0`);
+        db.run(`DELETE FROM claims`);
+
+        await updateLeaderboard();
+
+        await interaction.followUp({
+            content: "✅ Leaderboard reset complete.",
+            ephemeral: true
+        });
+
+    } catch (err) {
+        console.error(err);
+        await interaction.followUp({
+            content: "❌ Reset failed.",
+            ephemeral: true
+        });
+    }
 });
 
 /*
@@ -203,11 +269,6 @@ async function checkSeasonReset() {
 
         let newMVP = null;
 
-        /*
-        =====================================
-        REMOVE OLD MVP ROLE
-        =====================================
-        */
         if (TOP_ROLE_ID) {
             try {
                 const members = await guild.members.fetch();
@@ -221,11 +282,6 @@ async function checkSeasonReset() {
             }
         }
 
-        /*
-        =====================================
-        ASSIGN NEW MVP ROLE
-        =====================================
-        */
         if (topUser && TOP_ROLE_ID) {
             try {
                 const member = await guild.members.fetch(topUser.user_id);
@@ -347,7 +403,7 @@ function buildEmbed(boardText) {
 Tracks completed revives across each quarter.
 
 **How it works**
-- Once a reive is complete respond to the request with a 💉 emoji to earn points
+- React to revive request with 💉 to earn points
 - Each message counts once per user
 - Scores reset every quarter
 - Abusing the system can result in a ban
