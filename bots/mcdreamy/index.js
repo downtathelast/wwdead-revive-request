@@ -1,4 +1,5 @@
 require('dotenv').config();
+db.run(`DELETE FROM config WHERE key='leaderboard_message'`);
 
 const {
     Client,
