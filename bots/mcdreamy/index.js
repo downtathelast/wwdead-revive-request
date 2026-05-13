@@ -8,8 +8,21 @@ const {
 } = require('discord.js');
 
 const sqlite3 = require('sqlite3').verbose();
-
 const db = new sqlite3.Database('./mcdreamy.db');
+
+/*
+=====================================
+SAFETY NET (CRASH PREVENTION)
+=====================================
+*/
+
+process.on('unhandledRejection', (err) => {
+    console.error('Unhandled Rejection:', err);
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+});
 
 /*
 =====================================
@@ -18,8 +31,23 @@ CONFIG
 */
 
 const EMOJI = '💉';
-
 const LEADERBOARD_CHANNEL_ID = process.env.LEADERBOARD_CHANNEL_ID;
+
+/*
+=====================================
+VALIDATION (CRITICAL)
+=====================================
+*/
+
+if (!process.env.TOKEN) {
+    console.error("Missing TOKEN in environment variables");
+    process.exit(1);
+}
+
+if (!LEADERBOARD_CHANNEL_ID) {
+    console.error("Missing LEADERBOARD_CHANNEL_ID in environment variables");
+    process.exit(1);
+}
 
 /*
 =====================================
@@ -70,15 +98,19 @@ CREATE TABLE IF NOT EXISTS config (
 
 /*
 =====================================
-READY
+READY EVENT
 =====================================
 */
 
 client.once('ready', async () => {
     console.log(`💉 McDreamy online as ${client.user.tag}`);
 
-    await ensureLeaderboardMessage();
-    await updateLeaderboard();
+    try {
+        await ensureLeaderboardMessage();
+        await updateLeaderboard();
+    } catch (err) {
+        console.error("Startup error:", err);
+    }
 });
 
 /*
@@ -88,12 +120,25 @@ ENSURE LEADERBOARD MESSAGE
 */
 
 async function ensureLeaderboardMessage() {
+    let channel;
 
-    const channel = await client.channels.fetch(LEADERBOARD_CHANNEL_ID);
+    try {
+        channel = await client.channels.fetch(LEADERBOARD_CHANNEL_ID);
+    } catch (err) {
+        console.error("Failed to fetch channel:", err);
+        return;
+    }
+
+    if (!channel) return;
 
     db.get(`
         SELECT value FROM config WHERE key = 'leaderboard_message'
     `, async (err, row) => {
+
+        if (err) {
+            console.error("DB error:", err);
+            return;
+        }
 
         if (row) return;
 
@@ -102,12 +147,17 @@ async function ensureLeaderboardMessage() {
             .setDescription('No activity yet.')
             .setFooter({ text: 'Live engagement tracking system' });
 
-        const msg = await channel.send({ embeds: [embed] });
+        try {
+            const msg = await channel.send({ embeds: [embed] });
 
-        db.run(`
-            INSERT INTO config(key, value)
-            VALUES ('leaderboard_message', ?)
-        `, [msg.id]);
+            db.run(`
+                INSERT INTO config(key, value)
+                VALUES ('leaderboard_message', ?)
+            `, [msg.id]);
+
+        } catch (err) {
+            console.error("Failed to send leaderboard message:", err);
+        }
     });
 }
 
@@ -123,10 +173,32 @@ async function updateLeaderboard() {
         SELECT value FROM config WHERE key = 'leaderboard_message'
     `, async (err, row) => {
 
+        if (err) {
+            console.error("DB error:", err);
+            return;
+        }
+
         if (!row) return;
 
-        const channel = await client.channels.fetch(LEADERBOARD_CHANNEL_ID);
-        const message = await channel.messages.fetch(row.value);
+        let channel;
+
+        try {
+            channel = await client.channels.fetch(LEADERBOARD_CHANNEL_ID);
+        } catch (err) {
+            console.error("Channel fetch failed:", err);
+            return;
+        }
+
+        if (!channel) return;
+
+        let message;
+
+        try {
+            message = await channel.messages.fetch(row.value);
+        } catch (err) {
+            console.error("Message fetch failed:", err);
+            return;
+        }
 
         db.all(`
             SELECT username, points
@@ -135,9 +207,14 @@ async function updateLeaderboard() {
             LIMIT 10
         `, async (err, rows) => {
 
+            if (err) {
+                console.error("DB error:", err);
+                return;
+            }
+
             let text = '';
 
-            if (!rows.length) {
+            if (!rows || rows.length === 0) {
                 text = 'No activity yet.';
             } else {
                 rows.forEach((r, i) => {
@@ -159,55 +236,64 @@ async function updateLeaderboard() {
                     text: `Updated ${new Date().toLocaleString()}`
                 });
 
-            await message.edit({ embeds: [embed] });
+            try {
+                await message.edit({ embeds: [embed] });
+            } catch (err) {
+                console.error("Failed to edit leaderboard:", err);
+            }
         });
     });
 }
 
 /*
 =====================================
-REACTION TRACKING (GLOBAL)
+REACTION TRACKING
 =====================================
 */
 
 client.on('messageReactionAdd', async (reaction, user) => {
 
-    if (user.bot) return;
+    try {
+        if (user.bot) return;
 
-    if (reaction.partial) await reaction.fetch();
+        if (reaction.partial) await reaction.fetch();
 
-    // ONLY TRACK 💉
-    if (reaction.emoji.name !== EMOJI) return;
+        if (reaction.emoji.name !== EMOJI) return;
 
-    // PREVENT DOUBLE COUNTING PER MESSAGE
-    db.get(`
-        SELECT * FROM claims WHERE message_id = ?
-    `, [reaction.message.id], async (err, row) => {
+        db.get(`
+            SELECT * FROM claims WHERE message_id = ?
+        `, [reaction.message.id], async (err, row) => {
 
-        if (row) {
-            await reaction.users.remove(user.id);
-            return;
-        }
+            if (err) {
+                console.error("DB error:", err);
+                return;
+            }
 
-        // MARK CLAIMED
-        db.run(`
-            INSERT INTO claims(message_id, claimed_by)
-            VALUES (?, ?)
-        `, [reaction.message.id, user.id]);
+            if (row) {
+                await reaction.users.remove(user.id).catch(() => {});
+                return;
+            }
 
-        // ADD POINT
-        db.run(`
-            INSERT INTO leaderboard(user_id, username, points)
-            VALUES (?, ?, 1)
-            ON CONFLICT(user_id)
-            DO UPDATE SET
-                points = points + 1,
-                username = excluded.username
-        `, [user.id, user.username]);
+            db.run(`
+                INSERT INTO claims(message_id, claimed_by)
+                VALUES (?, ?)
+            `, [reaction.message.id, user.id]);
 
-        // UPDATE BOARD
-        await updateLeaderboard();
-    });
+            db.run(`
+                INSERT INTO leaderboard(user_id, username, points)
+                VALUES (?, ?, 1)
+                ON CONFLICT(user_id)
+                DO UPDATE SET
+                    points = points + 1,
+                    username = excluded.username
+            `, [user.id, user.username]);
+
+            await updateLeaderboard();
+        });
+
+    } catch (err) {
+        console.error("Reaction handler error:", err);
+    }
 });
 
 /*
