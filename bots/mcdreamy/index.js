@@ -19,7 +19,7 @@ CONFIG
 
 const EMOJI = '💉';
 
-const LEADERBOARD_CHANNEL_ID = 'CHANNEL_ID';
+const LEADERBOARD_CHANNEL_ID = process.env.LEADERBOARD_CHANNEL_ID;
 
 /*
 =====================================
